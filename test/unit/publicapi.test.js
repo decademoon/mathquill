@@ -114,7 +114,7 @@ suite('Public API', function() {
       mq.latex('x+y');
       assert.equal(mq.html(), '<var>x</var><span class="mq-binary-operator">+</span><var>y</var>');
     });
-    
+
     test('.text() with incomplete commands', function() {
       assert.equal(mq.text(), '');
       mq.typedText('\\');
@@ -436,6 +436,32 @@ suite('Public API', function() {
       assert.equal(cursor[R], 0, 'cursor at end of block');
 
       $(mq.el()).remove();
+    });
+  });
+
+  suite('maxDepth option', function() {
+    setup(function() {
+      mq = MQ.MathField($('<span></span>').appendTo('#mock')[0], {
+        maxDepth: 1
+      });
+    });
+    teardown(function() {
+      $(mq.el()).remove();
+    });
+
+    test('prevents nested math input via .write() method', function() {
+      mq.write('1\\frac{\\frac{3}{3}}{2}');
+      assert.equal(mq.latex(), '1\\frac{ }{ }');
+    });
+
+    test('prevents nested math input via keyboard input', function() {
+      mq.cmd('/').write('x');
+      assert.equal(mq.latex(), '\\frac{ }{ }');
+    });
+
+    test('stops new fraction moving content into numerator', function() {
+      mq.write('x').cmd('/');
+      assert.equal(mq.latex(), 'x\\frac{ }{ }');
     });
   });
 
